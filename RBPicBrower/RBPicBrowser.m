@@ -70,6 +70,10 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
 {
     [self createCollectionView];
     
+    // 添加页码label
+    [self.view addSubview:self.indexLabel];
+    
+    
     // 单击
     _singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapGesAction:)];
     [self.view addGestureRecognizer:_singleTap];
@@ -135,8 +139,18 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     });
 }
 
-
 #pragma mark - 二 UI & set
+- (UILabel *)indexLabel {
+    if (!_indexLabel) {
+        _indexLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 80, kScreen_W - 100, 50)];
+//        _indexLabel.backgroundColor = [UIColor redColor];
+        _indexLabel.textColor = [UIColor whiteColor];
+        _indexLabel.font = [UIFont systemFontOfSize:20.0 weight:(18.0)];
+        _indexLabel.textAlignment = NSTextAlignmentCenter;
+    }
+    return _indexLabel;
+}
+
 - (void)createCollectionView
 {
     CGRect mainBounds = [UIScreen mainScreen].bounds;
@@ -184,6 +198,8 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
 {
     _currentIndex = (NSInteger)(scrollView.contentOffset.x / kScreen_W);
     NSLog(@"当前页数:%ld",_currentIndex);
+    
+    [self currentIndex:_currentIndex totoalCount:_urls.count];
 }
 
 #pragma mark - 五 私有方法
@@ -208,20 +224,8 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     if (count == 1) {
         self.indexLabel.text = nil;
     } else {
-        // 调整字间距的富文本
-        NSString *indexStr = [NSString stringWithFormat:@"%li/%li",(long)index+1, (long)count];
-        
-        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-        paragraphStyle.alignment = NSTextAlignmentCenter;
-        
-        NSMutableDictionary *attDic = [NSMutableDictionary dictionary];
-        
-        attDic[NSParagraphStyleAttributeName] = paragraphStyle;
-        attDic[NSKernAttributeName] = @2;
-        
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:indexStr attributes:attDic];
-        
-        self.indexLabel.attributedText = attStr;
+        // 页数从0开始 所以+1
+        self.indexLabel.text = [NSString stringWithFormat:@"%ld/%ld",index+1,count];
     }
 }
 
@@ -283,7 +287,7 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     rect.size.height = rect.size.width * (1 /imgScale);
     
     // 根据scrollView滚动的距离计算中心点
-    // 真心复杂.日了狗了。不想搞了。崩溃了. 对scrollView的属性不熟。 算的蛋疼
+    // 真心复杂.日了狗了。不想搞了。崩溃了. 算的蛋疼
     CGPoint scrollCenter = CGPointMake(imgView.center.x - cell.gestureView.scrollView.contentOffset.x, imgView.center.y - cell.gestureView.scrollView.contentOffset.y);
     
     ivC.center = scrollCenter;
@@ -345,7 +349,7 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     
     [self show];
     
-    // 必须调用给你
+    // 必须调用才会显示。
     [self performZoomInAnimation];
 }
 
