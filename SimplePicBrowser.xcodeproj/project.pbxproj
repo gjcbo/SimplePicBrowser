@@ -138,12 +138,12 @@
 			isa = PBXGroup;
 			children = (
 				49E6A5E020750DBC00A15BA2 /* RBPicBrowser.h */,
-				49E6A5E120750DBC00A15BA2 /* RBWaitingView.h */,
-				49E6A5E220750DBC00A15BA2 /* RBPicBrowserCell.h */,
-				49E6A5E320750DBC00A15BA2 /* RBGestureView.h */,
 				49E6A5E420750DBC00A15BA2 /* RBPicBrowser.m */,
-				49E6A5E520750DBC00A15BA2 /* RBPicBrowserCell.m */,
+				49E6A5E120750DBC00A15BA2 /* RBWaitingView.h */,
 				49E6A5E620750DBC00A15BA2 /* RBWaitingView.m */,
+				49E6A5E220750DBC00A15BA2 /* RBPicBrowserCell.h */,
+				49E6A5E520750DBC00A15BA2 /* RBPicBrowserCell.m */,
+				49E6A5E320750DBC00A15BA2 /* RBGestureView.h */,
 				49E6A5E720750DBC00A15BA2 /* RBGestureView.m */,
 			);
 			path = RBPicBrower;

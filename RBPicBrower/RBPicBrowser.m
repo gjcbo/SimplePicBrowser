@@ -8,7 +8,6 @@
 #define kScreen_W [UIScreen mainScreen].bounds.size.width
 #define kScreen_H [UIScreen mainScreen].bounds.size.height
 #define kKeyWindow [UIApplication sharedApplication].keyWindow
-#define kPhotoPadding 10
 #define kDurationTime 0.35
 #define kScreenScale (kScreen_W / kScreen_H)
 
@@ -58,7 +57,6 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     self = [super init];
     if (self) {
         self.view.frame = CGRectMake(0, 0, kScreen_W, kScreen_H);
-        self.view.backgroundColor = [UIColor blackColor];
         
         _isScale = NO; // 一开始缩放状态为 NO
         
@@ -146,13 +144,16 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
     UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
     [flowLayout setScrollDirection:(UICollectionViewScrollDirectionHorizontal)];
     flowLayout.itemSize = mainBounds.size;
-    
-    flowLayout.minimumLineSpacing = kPhotoPadding;
+    flowLayout.minimumLineSpacing = 0; // 没有间距。
     
     _collectionView = [[UICollectionView alloc] initWithFrame:mainBounds collectionViewLayout:flowLayout];
     _collectionView.delegate = self;
     _collectionView.dataSource = self;
-    _collectionView.bounces = NO;
+    // 隐藏垂直方向的和水平方向的内容条
+    _collectionView.showsVerticalScrollIndicator = NO;
+    _collectionView.showsHorizontalScrollIndicator = NO;
+    _collectionView.pagingEnabled = YES; // 可以分页
+//    _collectionView.backgroundColor = [UIColor orangeColor];
     
     [_collectionView registerClass:[RBPicBrowserCell class] forCellWithReuseIdentifier:picBrowserCellId];
     
@@ -179,49 +180,24 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
 }
 
 #pragma mark - 四 UIScrollViewDelegate
-// 在scrollView代理方法中手动 计算分页
-//- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
-//{
-//    CGFloat pageW = self.collectionView.frame.size.width + kPhotoPadding; // w + space
-//    CGFloat currentOffset = scrollView.contentOffset.x;
-//    CGFloat targetOffset = targetContentOffset->x; // -> 访问结构体成员
-//    CGFloat newTargetOffset = 0;
-//
-//    if (targetOffset > currentOffset) {
-//        // 向上取整数 ceilf  https://www.jianshu.com/p/0ca725ecf7f7
-//        newTargetOffset = ceilf(currentOffset / pageW);
-//    } else {
-//        // 向下取整
-//        newTargetOffset = floorf(currentOffset / pageW) * pageW;
-//    }
-//
-//    if (newTargetOffset < 0) {
-//        newTargetOffset = 0;
-//    }else if (newTargetOffset  > scrollView.contentSize.width){
-//        newTargetOffset = scrollView.contentSize.width;
-//    }
-//
-//    targetContentOffset->x = currentOffset;
-//
-//    [scrollView setContentOffset:CGPointMake(newTargetOffset, 0) animated:YES];
-//
-//    // 设置当前页码
-//    _currentIndex = newTargetOffset / pageW;
-//    [self currentIndex:_currentIndex totoalCount:_urls.count];
-//}
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    _currentIndex = (NSInteger)(scrollView.contentOffset.x / kScreen_W);
+    NSLog(@"当前页数:%ld",_currentIndex);
+}
 
 #pragma mark - 五 私有方法
 - (void)show
 {
     self.view.hidden = YES; // 先加载图片,加载完之后在让他显示
-    
+
     // present self
     [_presentedVC presentViewController:self animated:NO completion:^{
         [UIApplication sharedApplication].statusBarHidden = YES;
     }];
     
     // 设置偏移量
-    CGFloat offsetY = _currentIndex * (kScreen_W + kPhotoPadding);
+    CGFloat offsetY = _currentIndex * kScreen_W;
     
     self.collectionView.contentOffset = CGPointMake(offsetY, 0);
 }
@@ -324,7 +300,6 @@ static NSString *picBrowserCellId = @"picBrowserCellId";
 - (void)animateImageView:(UIImageView *)imageView toRect:(CGRect)destinationRect{
     // 设置蒙版
     UIView *cover = [[UIView alloc] initWithFrame:kKeyWindow.bounds];
-    cover.backgroundColor = [UIColor blackColor];
     [kKeyWindow addSubview:cover];
     
     //2.添加图片
